@@ -1,0 +1,112 @@
+# ========================
+# 核心配置
+# ========================
+title: "星辰聚合平台"
+description: "主站与用户共创小说社区"
+baseurl: "/pu-cait"  # 必须与仓库名一致
+url: "https://pu-94.github.io"
+timezone: "Asia/Shanghai"
+future: false  # 不显示未来日期文章
+
+# ========================
+# 构建优化
+# ========================
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+
+plugins:
+  - jekyll-paginate
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+exclude:
+  - "*.bat"
+  - ".env"
+  - "Gemfile.lock"
+  - "vendor"
+  - "novels/_books/*"  # 排除原始投稿目录
+
+# ========================
+# 主站配置
+# ========================
+platform:
+  nav_links:
+    - name: "首页"
+      url: "/"
+    - name: "小说社区"
+      url: "/novels/"
+    - name: "论坛"
+      url: "/apps/forum/"
+  
+  auth:
+    github_oauth: true  # 启用GitHub登录
+    required_email: true # 需验证邮箱
+
+# ========================
+# 小说子站配置
+# ========================
+novels:
+  # 目录结构
+  source_dir: "novels/_books/approved"
+  output_dir: "novels/_site"
+  cover_dir: "novels/assets/covers"
+  
+  # 展示控制
+  paginate: 12          # 每页显示书籍数
+  default_layout: "novel"
+  allowed_tags: [奇幻, 武侠, 科幻] # 允许的分类标签
+  
+  # 权限系统
+  submit_roles: [user]   # 投稿权限
+  edit_roles: [owner, admin]
+  delete_roles: [admin]
+
+  # 构建扩展
+  extra_files:
+    - "novels/_data/books.yml"  # 自动生成的书目索引
+    - "novels/_data/stats.yml"  # 阅读统计
+
+# ========================
+# 多环境配置
+# ========================
+development:
+  url: "http://localhost:4000"
+  novels:
+    debug: true
+    show_drafts: true
+
+production:
+  url: "https://pu-94.github.io"
+  novels:
+    cache: true
+    minify: true
+
+# ========================
+# 第三方集成
+# ========================
+algolia:
+  app_id: "YOUR_APP_ID"
+  index_name: "books"
+  search_api_key: "YOUR_SEARCH_KEY"
+
+disqus:
+  shortname: "your-disqus-shortname"
+
+google_analytics: "UA-XXXXX-X"
+
+# ========================
+# 自定义变量
+# ========================
+theme_settings:
+  primary_color: "#3b82f6"
+  content_width: "1200px"
+  font_stack: "Helvetica, Arial, 'PingFang SC', sans-serif"
+
+custom:
+  novel_license: |
+    本平台作品采用「CC BY-NC-SA 4.0」协议，
+    禁止商业用途，转载需注明作者及链接。
