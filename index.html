@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  {%- include head.html -%}
+  <link rel="stylesheet" href="{{ '/assets/css/home.css' | relative_url }}">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <header class="platform-header">
+    <div class="container">
+      <a href="{{ '/' | relative_url }}" class="logo">
+        <img src="{{ '/assets/images/logo.svg' | relative_url }}" alt="星辰平台">
+      </a>
+      <nav>
+        <ul>
+          <li><a href="{{ '/novels/' | relative_url }}">小说社区</a></li>
+          <li><a href="{{ '/apps/forum/' | relative_url }}">交流论坛</a></li>
+          <li><a href="{{ '/apps/wiki/' | relative_url }}">创作指南</a></li>
+        </ul>
+      </nav>
+      <div class="auth-buttons">
+        {% if site.github.owner_name %}
+          <a href="https://github.com/{{ site.github.owner_name }}" class="btn">
+            <i class="icon-github"></i> 我的主页
+          </a>
+        {% else %}
+          <a href="/login" class="btn btn-outline">登录</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- 主横幅 -->
+  <section class="hero">
+    <div class="container">
+      <h1>发现属于你的故事宇宙</h1>
+      <p>连接创作者与读者的开放式文学平台</p>
+      <div class="cta-buttons">
+        <a href="{{ '/novels/' | relative_url }}" class="btn btn-primary">
+          探索书库
+        </a>
+        <a href="{{ site.github.repository_url }}/issues/new?template=01-submit-novel.md" 
+           class="btn btn-outline" target="_blank">
+          开始创作
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 热门小说展示 -->
+  <section class="featured-novels">
+    <div class="container">
+      <h2>本周热门</h2>
+      <div class="novel-grid">
+        {%- assign sorted_books = site.data.novels.books | sort: 'views' | reverse -%}
+        {%- for book in sorted_books limit:6 -%}
+          <div class="novel-card">
+            <a href="{{ '/novels/books/' | append: book.id | relative_url }}">
+              <img 
+                src="{{ book.cover | default: '/novels/assets/covers/default.jpg' | relative_url }}" 
+                alt="{{ book.title }}"
+                loading="lazy"
+              >
+              <div class="novel-info">
+                <h3>{{ book.title }}</h3>
+                <p class="author">作者：{{ book.author }}</p>
+                <div class="meta">
+                  <span class="views">
+                    <i class="icon-eye"></i> {{ book.views | default: 0 }}
+                  </span>
+                  <span class="chapters">
+                    <i class="icon-book"></i> {{ book.chapters | size }}章
+                  </span>
+                </div>
+              </div>
+            </a>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  <!-- 平台数据统计 -->
+  <section class="platform-stats">
+    <div class="container">
+      <div class="stat-card">
+        <div class="stat-number">{{ site.data.novels.stats.books | default: 0 }}</div>
+        <div class="stat-label">收录作品</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ site.data.novels.stats.authors | default: 0 }}</div>
+        <div class="stat-label">入驻作者</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ site.data.novels.stats.words | default: 0 }}万</div>
+        <div class="stat-label">累计字数</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 最新动态 -->
+  <section class="recent-activity">
+    <div class="container">
+      <h2>最新动态</h2>
+      <div class="activity-feed">
+        {%- assign recent_updates = site.data.novels.updates | sort: 'date' | reverse -%}
+        {%- for update in recent_updates limit:5 -%}
+          <div class="activity-item">
+            <span class="date">{{ update.date | date: "%m/%d" }}</span>
+            <a 
+              href="{{ '/novels/books/' | append: update.book_id | relative_url }}#chapter-{{ update.chapter }}" 
+              class="content"
+            >
+              《{{ update.book_title }}》更新第{{ update.chapter }}章
+            </a>
+            <span class="author">{{ update.author }}</span>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- include footer.html -%}
+
+  <!-- 动态数据加载 -->
+  <script>
+    // 异步加载更多小说
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.IntersectionObserver) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              // 这里可以添加无限滚动逻辑
+            }
+          });
+        });
+        observer.observe(document.querySelector('.novel-grid'));
+      }
+    });
+  </script>
+</body>
+</html>
