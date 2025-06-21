@@ -1,0 +1,43 @@
+name: Main Platform CI
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 每小时构建一次
+  push:
+    branches: [main]
+    paths:
+      - '!novels/**'      # 小说目录变更不触发此工作流
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gem
+            vendor/bundle
+          key: ${{ runner.os }}-platform-${{ hashFiles('**/Gemfile.lock') }}
+
+      - name: Build with Jekyll
+        run: |
+          bundle exec jekyll build \
+            --config _config.yml \
+            --destination ./_site \
+            --baseurl "/pu-cait"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./_site
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v2

@@ -1,0 +1,47 @@
+name: Book Audit
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'approve/reject'
+        required: true
+      book_id:
+        description: 'Book ID to process'
+        required: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Process approval
+        if: ${{ github.event.comment.body.contains('/approve') }}
+        run: |
+          python .github/scripts/process_approval.py \
+            --user "${{ github.event.issue.user.login }}" \
+            --issue "${{ github.event.issue.number }}" \
+            --action "approve"
+
+      - name: Process rejection
+        if: ${{ github.event.comment.body.contains('/reject') }}
+        run: |
+          python .github/scripts/process_approval.py \
+            --user "${{ github.event.issue.user.login }}" \
+            --issue "${{ github.event.issue.number }}" \
+            --action "reject"
+
+      - name: Trigger rebuild
+        if: ${{ github.event.comment.body.contains('/approve') }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'main-build.yml',
+              ref: 'main'
+            })

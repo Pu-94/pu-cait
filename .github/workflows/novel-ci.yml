@@ -1,0 +1,43 @@
+name: Novel Submission CI
+
+on:
+  issues:
+    types: [opened, edited]
+    paths:
+      - 'novels/**'
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract novel content
+        id: extract
+        uses: actions/github-script@v6
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        with:
+          script: |
+            const content = `
+            ---
+            title: "${{ github.event.issue.title.replace('【投稿】', '') }}"
+            author: "${{ github.event.issue.user.login }}"
+            date: "${{ new Date().toISOString() }}"
+            status: pending
+            ---
+            ${process.env.ISSUE_BODY.split('### 正文')[1]}
+            `
+            return { content }
+
+      - name: Save submission
+        run: |
+          mkdir -p "novels/_books/pending/${{ github.event.issue.user.login }}"
+          echo "${{ steps.extract.outputs.result.content }}" > \
+            "novels/_books/pending/${{ github.event.issue.user.login }}/${{ github.event.issue.number }}.md"
+
+      - name: Notify moderators
+        uses: ./.github/scripts/notify-discord.js
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          message: "新投稿待审核：#${{ github.event.issue.number }}"
